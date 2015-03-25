@@ -11,8 +11,7 @@
 
 @implementation Geo
 
-- (instancetype)initWithDictionary:(NSDictionary *)geo
-{
+- (instancetype)initWithDictionary:(NSDictionary *)geo {
     self = [super init];
     if (self) {
         NSArray *coordinatesArray = [geo arrayValueForKey:@"coordinates"];

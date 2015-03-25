@@ -8,21 +8,18 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum
-{
+typedef enum {
     Unknow = 0,
     Male,
     Female
 }Gender;
 
-typedef enum
-{
+typedef enum {
     Offline = 0,
     Online = 1
 }OnlineState;
 
-typedef enum
-{
+typedef enum {
     UnVertify,
     Start,
     Orgnization

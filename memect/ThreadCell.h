@@ -7,7 +7,13 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "MemectThread.h"
 
 @interface ThreadCell : UITableViewCell
+
+// thread
+@property(nonatomic, strong)MemectThread *thread;
+// height
+@property(nonatomic, assign)int height;
 
 @end

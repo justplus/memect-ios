@@ -9,19 +9,15 @@
 #import <Foundation/Foundation.h>
 
 @interface Account : NSObject<NSCoding>
-//access_token
+
 @property(nonatomic, strong)NSString *accessToken;
-//expires_in
 @property(nonatomic, strong)NSString *expiresIn;
-//expires_time
 @property(nonatomic, strong)NSDate *expiresTime;
-//uid
-@property(nonatomic, strong)NSString *uid;
+@property(nonatomic, assign)long long uid;
 
+- (instancetype)initWithDictionary:(NSDictionary *)account;
 - (instancetype)initWithString:(NSString *)jsonString;
-
 - (void)saveAccount;
-
 - (instancetype)initWithArchiever;
 
 @end

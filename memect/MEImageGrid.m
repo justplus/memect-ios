@@ -16,7 +16,7 @@
 #define kMargin 5
 
 @interface MEImageGrid()
-@property(nonatomic, copy)NSMutableArray *imageViews;
+
 @end
 
 @implementation MEImageGrid
@@ -30,7 +30,6 @@
     //创建UIImageView
     for (int i=0; i<[_imageUrls count]; i++) {
         UIImageView *imageView = [UIImageView new];
-        [self.imageViews addObject:imageView];
         [self addSubview:imageView];
         
         int row = i / 3;
@@ -40,7 +39,7 @@
         CGFloat y = startY + row * (kHeight + kMargin);
         imageView.frame = CGRectMake(x, y, kWidth, kHeight);
         
-        [imageView sd_setImageWithURL:[NSURL URLWithString:_imageUrls[i]] placeholderImage:[UIImage imageNamed:@"common_loading"]];
+        [imageView sd_setImageWithURL:[NSURL URLWithString:_imageUrls[i]] placeholderImage:[UIImage imageNamed:@"common_image_loading"]];
         imageView.clipsToBounds = YES;
         imageView.contentMode =UIViewContentModeScaleAspectFill;
         

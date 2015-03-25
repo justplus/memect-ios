@@ -12,7 +12,6 @@
 #import "User.h"
 #import "FrameViewController.h"
 #import "NSDictionary+Json.h"
-#import "NZAlertView.h"
 #import "Util.h"
 #import <MBProgressHUD/MBProgressHUD.h>
 
@@ -80,9 +79,9 @@
         Account *account = [[Account alloc] initWithString:result];
         // 将账号信息保存在本地，同时请求数据库保存
         NSMutableDictionary *userSaveParameters = [NSMutableDictionary dictionary];
-        userSaveParameters[@"weibo_uid"] = account.uid;
+        userSaveParameters[@"weibo_uid"] = @(account.uid);
         // 根据uid获取用户详细信息
-        [MERequestTool GET:GET_USER_URL parameters:@{@"access_token": account.accessToken, @"uid": account.uid} response:@"json" success:^(id responseObject) {
+        [MERequestTool GET:GET_USER_URL parameters:@{@"access_token": account.accessToken, @"uid": @(account.uid)} response:@"json" success:^(id responseObject) {
             //User *currentUser = [[User alloc] initWithDictionary:responseObject];
             NSError *error;
             NSData *data = [NSJSONSerialization dataWithJSONObject:responseObject options:0 error:&error];

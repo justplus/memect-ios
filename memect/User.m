@@ -11,8 +11,7 @@
 
 @implementation User
 
-- (instancetype)initWithDictionary:(NSDictionary *)user
-{
+- (instancetype)initWithDictionary:(NSDictionary *)user {
     self = [super init];
     if (self) {
         self.id = [user longLongValueForKey:@"id"];

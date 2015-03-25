@@ -9,11 +9,11 @@
 #import "Status.h"
 #import "User.h"
 #import "NSDictionary+Json.h"
+#include "NSDictionary_JSONExtensions.h"
 
 @implementation Status
 
-- (instancetype)initWithDictionary:(NSDictionary *)status
-{
+- (instancetype)initWithDictionary:(NSDictionary *)status {
     self = [super init];
     if (self) {
         self.tid = [status longLongValueForKey:@"id"];
@@ -52,4 +52,33 @@
     return self;
 }
 
+- (instancetype)initWithJsonString:(NSString *)statusJson {
+    self = [super init];
+    if (self) {
+        // json字符串反序列化
+        if (!statusJson) {
+            return nil;
+        }
+        /*statusJson = [self escapeBlank:statusJson];
+        NSData *data = [statusJson dataUsingEncoding:NSUTF8StringEncoding];*/
+        statusJson = [self escapeSource:statusJson];
+        NSError *err = NULL;
+        NSDictionary *dict = [NSDictionary dictionaryWithJSONString:statusJson error:&err];
+        return [self initWithDictionary:dict];
+    }
+    return self;
+}
+
+- (NSString *)escapeSource:(NSString *)json {
+    NSRegularExpression *regex;
+    NSString *pattern = @"\"source\": \"<a href=.*?</a>\",";
+    NSError *error = NULL;
+    regex = [NSRegularExpression regularExpressionWithPattern:pattern options:NSRegularExpressionCaseInsensitive error:&error];
+    NSArray *matchResult = [regex matchesInString:json options:NSMatchingReportCompletion range:NSMakeRange(0, json.length)];
+    for (NSTextCheckingResult *result in matchResult) {
+        json = [json stringByReplacingCharactersInRange:
+                NSMakeRange(result.range.location, result.range.length) withString:@""];
+    }
+    return json;
+}
 @end

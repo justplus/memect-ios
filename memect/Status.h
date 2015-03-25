@@ -28,5 +28,6 @@
 @property(nonatomic, strong)Status *retweetedStatus;
 
 - (instancetype)initWithDictionary:(NSDictionary *)status;
+- (instancetype)initWithJsonString:(NSString *)statusJson;
 
 @end
