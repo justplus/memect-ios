@@ -9,7 +9,6 @@
 #import "Status.h"
 #import "User.h"
 #import "NSDictionary+Json.h"
-#include "NSDictionary_JSONExtensions.h"
 
 @implementation Status
 
@@ -37,7 +36,7 @@
         self.commentsCount = [status intValueForKey:@"comments_count"];
         self.attitudesCount = [status intValueForKey:@"attitudes_count"];
         self.repostsCount = [status intValueForKey:@"reposts_count"];
-        self.createTime = [status timeValueForKey:@"create_at"];
+        self.createTime = [status timeValueForKey:@"created_at"];
         self.hasFavorited = [status boolValueForKey:@"favorited"];
         self.source = [status stringValueForKey:@"source"];
         NSDictionary *user = [status dictionaryValueForKey:@"user"];
@@ -59,16 +58,15 @@
         if (!statusJson) {
             return nil;
         }
-        /*statusJson = [self escapeBlank:statusJson];
-        NSData *data = [statusJson dataUsingEncoding:NSUTF8StringEncoding];*/
         statusJson = [self escapeSource:statusJson];
-        NSError *err = NULL;
-        NSDictionary *dict = [NSDictionary dictionaryWithJSONString:statusJson error:&err];
+        NSData *data = [statusJson dataUsingEncoding:NSUTF8StringEncoding];
+        NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:0 error:nil];
         return [self initWithDictionary:dict];
     }
     return self;
 }
 
+// 微博内容json字符串中因为source中的双引号导致无法反序列化
 - (NSString *)escapeSource:(NSString *)json {
     NSRegularExpression *regex;
     NSString *pattern = @"\"source\": \"<a href=.*?</a>\",";

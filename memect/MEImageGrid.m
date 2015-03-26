@@ -45,7 +45,9 @@
         
         imageView.tag = i;
         imageView.userInteractionEnabled = YES;
-        [imageView addGestureRecognizer:[[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)]];
+        UIGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tapImage:)];
+        //[tap setCancelsTouchesInView:YES];
+        [imageView addGestureRecognizer:tap];
     }
     int rows = ((int)[_imageUrls count] - 1) / 3 + 1;
     self.height = startY + rows * kHeight + (rows - 1) * kMargin;
@@ -72,5 +74,12 @@
     [browser show];
 }
 
-
+-(BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
+{
+    if ([NSStringFromClass([touch.view class]) isEqualToString:@"UIImageView"]) {
+        //做自己想做的事
+        return NO;
+    }
+    return YES;
+}
 @end

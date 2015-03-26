@@ -9,12 +9,17 @@
 #import "ThreadCell.h"
 #import "MEImageGrid.h"
 #import "UIImageView+WebCache.h"
+#import "DWTagList.h"
 #import "UIView+UpdateAutoLayoutConstraints.h"
 
 // 索引块大小
-#define INDEX_SIZE 15
+#define INDEX_SIZE 16
 // 缩略图上下边距
 #define THUMBNAIL_MARGIN 5
+// 头像大小
+#define USER_AVATAR_SIZE 20
+// 分割线高度
+#define SEPERATOR_HEIGHT 0.5f
 
 
 @interface ThreadCell()
@@ -31,7 +36,9 @@
 // 分享者信息
 @property(nonatomic, strong)UILabel *shareInfo;
 // 标签
-
+@property(nonatomic, strong)DWTagList *tags;
+// 分割线
+@property(nonatomic, strong)UIView *seperator;
 @end
 
 @implementation ThreadCell
@@ -50,22 +57,25 @@
     [self.contentView addSubview:self.userAvatar];
     [self.contentView addSubview:self.status];
     [self.contentView addSubview:self.shareInfo];
+    [self.contentView addSubview:self.seperator];
     // add constraints for all subviews
-    NSDictionary *vars = NSDictionaryOfVariableBindings(_index, _userAvatar, _status, _shareInfo);
+    NSDictionary *vars = NSDictionaryOfVariableBindings(_index, _userAvatar, _status, _shareInfo, _seperator);
+    NSDictionary *metrics = @{@"indexSize":@INDEX_SIZE, @"userAvatarSize":@USER_AVATAR_SIZE, @"seperatorHeight":@SEPERATOR_HEIGHT};
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"H:|-[_index(==15)]-[_status]-(>=0)-|" options:0 metrics:0 views:vars]];
+                                      @"H:|-[_index(==indexSize)]-[_status]-(>=0)-|" options:0 metrics:metrics views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"V:|-(==0)-[_index(==15)]" options:0 metrics:0 views:vars]];
+                                      @"V:|-(==0)-[_index(==indexSize)]" options:0 metrics:metrics views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
                                       @"H:|-(>=0)-[_status]-|" options:0 metrics:0 views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"H:|-[_index]-[_userAvatar(==30)]-[_shareInfo]-(>=0)-|" options:0 metrics:0 views:vars]];
+                                      @"H:|-[_index]-[_userAvatar(==userAvatarSize)]-[_shareInfo]-(>=0)-|" options:0 metrics:metrics views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"V:|-(>=0)-[_userAvatar(==30)]-|" options:0 metrics:0 views:vars]];
+                                      @"V:|-(>=0)-[_userAvatar(==userAvatarSize)]-[_seperator(==seperatorHeight)]-|" options:0 metrics:metrics views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"V:|-(>=0)-[_shareInfo(==30)]-|" options:0 metrics:0 views:vars]];
+                                      @"V:|-(>=0)-[_shareInfo(==userAvatarSize)]-[_seperator(==seperatorHeight)]-|" options:0 metrics:metrics views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"V:|-(==0)-[_status]-(>=0)-[_userAvatar]-|" options:0 metrics:0 views:vars]];
+                                      @"V:|-(==0)-[_status]-(>=0)-[_userAvatar]" options:0 metrics:0 views:vars]];
+    [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_index]-[_seperator]-|" options:0 metrics:0 views:vars]];
     
 }
 
@@ -74,9 +84,10 @@
     // for reuse the cell, MUST remove the mutable view
     [self.retweetStatus removeFromSuperview];
     [self.thumbnails removeFromSuperview];
+    [self.tags removeFromSuperview];
     
     self.height = 0;
-    [self.index setText:@"1"];
+    [self.index setText:[NSString stringWithFormat:@"%d", thread.index]];
     [self.status setText:thread.weiboContent.text];
     CGFloat weiboContentWidth = self.contentView.frame.size.width - INDEX_SIZE - 3*8;
     CGSize weiboContentSize = [self.status sizeThatFits:CGSizeMake(weiboContentWidth, CGFLOAT_MAX)];
@@ -111,23 +122,34 @@
         self.height += THUMBNAIL_MARGIN;
         // add constraints
         [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.thumbnails attribute:NSLayoutAttributeLeft relatedBy:NSLayoutRelationEqual toItem:self.status attribute:NSLayoutAttributeLeft multiplier:1.0f constant:0.0f]];
+        [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.thumbnails attribute:NSLayoutAttributeRight relatedBy:NSLayoutRelationEqual toItem:self.status attribute:NSLayoutAttributeRight multiplier:1.0f constant:0.0f]];
         [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.thumbnails attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeTop multiplier:1.0f constant:self.height]];
         [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.thumbnails attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0f constant:self.thumbnails.height]];
         
         self.height += self.thumbnails.height + THUMBNAIL_MARGIN;
     }
     
+    if ([thread.tags count] > 0) {
+        self.tags = nil;
+        self.tags = [[DWTagList alloc] initWithFrame:CGRectMake(8 + INDEX_SIZE + 8, self.height,
+                                                                self.contentView.frame.size.width - 16 - INDEX_SIZE, 0.0f)];
+        [self.contentView addSubview:self.tags];
+        [self.tags setTags:[[NSArray alloc] initWithArray:thread.tags]];
+        CGSize tagsSize = self.tags.fittedSize;
+        self.height += tagsSize.height;
+    }
+    
     [self.userAvatar sd_setImageWithURL:[NSURL URLWithString:thread.weiboContent.user.profileImageUrl] placeholderImage:[UIImage imageNamed:@"tabbar_profile"]];
-    NSString  *dtFormat = @"%d-%m-%Y %H:%M";
-    NSString *info = [NSString stringWithFormat:@"%@分享于%@", thread.weiboContent.user.screenName,
+    NSString  *dtFormat = @"%Y-%m-%d %H:%M";
+    NSString *info = [NSString stringWithFormat:@"%@ 分享于%@", thread.weiboContent.user.screenName,
                       [self dateInFormat:thread.weiboContent.createTime format:dtFormat]];
     [self.shareInfo setText:info];
-    self.height += 30;
+    self.height += USER_AVATAR_SIZE;
     
-    self.height = self.height + 8;
+    self.height = self.height + 8 + SEPERATOR_HEIGHT + 8;
 }
 
--(NSString *)dateInFormat:(time_t)dateTime format:(NSString*) stringFormat
+- (NSString *)dateInFormat:(time_t)dateTime format:(NSString*)stringFormat
 {
     char buffer[80];
     const char *format = [stringFormat UTF8String];
@@ -136,6 +158,7 @@
     strftime(buffer, 80, format, timeinfo);
     return [NSString  stringWithCString:buffer encoding:NSUTF8StringEncoding];
 }
+
 
 #pragma mark - lazy load view
 - (UILabel *)index {
@@ -156,7 +179,7 @@
     if (!_userAvatar) {
         _userAvatar = [UIImageView new];
         _userAvatar.backgroundColor = [UIColor clearColor];
-        _userAvatar.layer.cornerRadius = 15;
+        _userAvatar.layer.cornerRadius = USER_AVATAR_SIZE/2;
         _userAvatar.layer.masksToBounds = YES;
         _userAvatar.layer.borderWidth = 0.5f;
         _userAvatar.layer.borderColor = [UIColor grayColor].CGColor;
@@ -211,5 +234,14 @@
         _shareInfo.translatesAutoresizingMaskIntoConstraints = NO;
     }
     return _shareInfo;
+}
+
+- (UIView *)seperator {
+    if (!_seperator) {
+        _seperator = [UIView new];
+        _seperator.backgroundColor = [UIColor grayColor];
+        _seperator.translatesAutoresizingMaskIntoConstraints = NO;
+    }
+    return _seperator;
 }
 @end

@@ -11,6 +11,8 @@
 
 @interface MemectThread : NSObject
 
+// 索引值
+@property(nonatomic, assign)int index;
 // 标签列表
 @property(nonatomic, copy)NSArray *tags;
 // 内容

@@ -23,13 +23,13 @@
     self = [super init];
     if (self) {
         UINavigationController *home = [[UINavigationController alloc] initWithRootViewController:[[HomeViewController alloc] init]];
-        home.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"首页" image:[UIImage imageNamed:@"tabbar_home"] tag:0];
+        home.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"简报" image:[UIImage imageNamed:@"tabbar_home"] tag:0];
         home.tabBarItem.titlePositionAdjustment = UIOffsetMake(0, -4);
         
         
         DiscoverViewController *discover = [[DiscoverViewController alloc] init];
-        discover.title = @"发现";
-        discover.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"发现" image:[UIImage imageNamed:@"tabbar_discover"] tag:1];
+        discover.title = @"订阅";
+        discover.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"订阅" image:[UIImage imageNamed:@"tabbar_discover"] tag:1];
         discover.tabBarItem.titlePositionAdjustment = UIOffsetMake(0, -4);
         
         MessageViewController *message = [[MessageViewController alloc] init];
