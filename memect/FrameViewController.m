@@ -26,9 +26,7 @@
         home.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"简报" image:[UIImage imageNamed:@"tabbar_home"] tag:0];
         home.tabBarItem.titlePositionAdjustment = UIOffsetMake(0, -4);
         
-        
-        DiscoverViewController *discover = [[DiscoverViewController alloc] init];
-        discover.title = @"订阅";
+        UINavigationController *discover = [[UINavigationController alloc] initWithRootViewController:[[DiscoverViewController alloc] init]];
         discover.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"订阅" image:[UIImage imageNamed:@"tabbar_discover"] tag:1];
         discover.tabBarItem.titlePositionAdjustment = UIOffsetMake(0, -4);
         

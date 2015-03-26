@@ -117,7 +117,7 @@
         //如果不设置为nil, 会复用之前的数据；因此为了重新初始化，必须设置为nil
         self.thumbnails = nil;
         [self.contentView addSubview:self.thumbnails];
-        [self.thumbnails setImageUrls:thumbnailPics];
+        self.thumbnails.imageUrls = thumbnailPics;
         
         self.height += THUMBNAIL_MARGIN;
         // add constraints

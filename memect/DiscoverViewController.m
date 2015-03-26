@@ -7,6 +7,11 @@
 //
 
 #import "DiscoverViewController.h"
+#import "MERequestTool.h"
+#import "NSDictionary+Json.h"
+#import "METypeCell.h"
+
+#define MEMECT_TYPE_URL      @"http://memect.sinaapp.com/api/types"
 
 @interface DiscoverViewController ()
 
@@ -14,24 +19,47 @@
 
 @implementation DiscoverViewController
 
+#pragma mark - init ui
 - (void)viewDidLoad {
-    [super viewDidLoad];
-    // Do any additional setup after loading the view.
+    [self setupView];
+    [self setupData];
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+- (void)setupView {
+    self.navigationItem.title = @"订阅";
+    [self.view setBackgroundColor:[UIColor whiteColor]];
 }
 
-/*
-#pragma mark - Navigation
-
-// In a storyboard-based application, you will often want to do a little preparation before navigation
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+- (void)setupData {
+    [MERequestTool GET:MEMECT_TYPE_URL parameters:nil response:@"json" success:^(id responseObject) {
+        NSDictionary *result = (NSDictionary *)responseObject;
+        int status = [result intValueForKey:@"status"];
+        if (status == 1) {
+            NSDictionary *data = [result dictionaryValueForKey:@"data"];
+            // int total = [data intValueForKey:@"total"];
+            int index = 0;
+            float frameX, frameY;
+            for (NSDictionary *dict in [data arrayValueForKey:@"types"]) {
+                if (index % 2 == 0) {
+                    frameX = 0;
+                }
+                else {
+                    frameX = self.view.frame.size.width/2;
+                }
+                frameY = index/2*160;
+                index++;
+                METypeCell *cell = [[METypeCell alloc] initWithFrame:CGRectMake(frameX, frameY + 60, self.view.frame.size.width/2, 160)];
+                MemectType *type = [[MemectType alloc] initWithDictionary:dict];
+                cell.type = type;
+                [self.view addSubview:cell];
+            }
+        }
+        else {
+            
+        }
+    } failure:^(NSError *error) {
+        NSLog(@"error: %@", error);
+    }];
 }
-*/
 
 @end
