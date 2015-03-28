@@ -20,6 +20,8 @@
 @property(nonatomic, copy)NSString *url;
 // 图标
 @property(nonatomic, copy)NSString *icon;
+// 是否已订阅
+@property(nonatomic, assign)BOOL hasSubscribe;
 
 - (instancetype)initWithDictionary:(NSDictionary *)type;
 

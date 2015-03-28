@@ -9,6 +9,8 @@
 #import "MemectType.h"
 #import "NSDictionary+Json.h"
 
+#define ACCOUNT_FILE_PATH [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"memect_types.plist"]
+
 @implementation MemectType
 
 - (instancetype)initWithDictionary:(NSDictionary *)type {
@@ -19,6 +21,7 @@
         self.abbr = [type stringValueForKey:@"abbr"];
         self.url = [type stringValueForKey:@"url"];
         self.icon = [type stringValueForKey:@"icon"];
+        self.hasSubscribe = [type boolValueForKey:@"has_subscribe"];
     }
     return self;
 }

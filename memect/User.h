@@ -25,7 +25,7 @@ typedef enum {
     Orgnization
 }Vertify;
 
-@interface User : NSObject
+@interface User : NSObject<NSCoding>
 
 @property(nonatomic, assign)long long id;
 @property(nonatomic, copy)NSString *idStr;
