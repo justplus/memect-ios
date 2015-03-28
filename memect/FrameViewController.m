@@ -2,47 +2,41 @@
 //  FrameViewController.m
 //  memect
 //
-//  Created by zhaoliang on 15/3/22.
+//  Created by zhaoliang on 15/3/28.
 //  Copyright (c) 2015年 zhaoliang. All rights reserved.
 //
 
 #import "FrameViewController.h"
+#import "MMDrawerController.h"
 #import "HomeViewController.h"
-#import "DiscoverViewController.h"
-#import "MessageViewController.h"
-#import "MineViewController.h"
+#import "SideMenuViewController.h"
 
 @interface FrameViewController ()
+
+@property (nonatomic,strong) MMDrawerController * drawerController;
 
 @end
 
 @implementation FrameViewController
 
-- (instancetype)init
-{
-    self = [super init];
-    if (self) {
-        UINavigationController *home = [[UINavigationController alloc] initWithRootViewController:[[HomeViewController alloc] init]];
-        home.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"简报" image:[UIImage imageNamed:@"tabbar_home"] tag:0];
-        home.tabBarItem.titlePositionAdjustment = UIOffsetMake(0, -4);
-        
-        UINavigationController *discover = [[UINavigationController alloc] initWithRootViewController:[[DiscoverViewController alloc] init]];
-        discover.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"订阅" image:[UIImage imageNamed:@"tabbar_discover"] tag:1];
-        discover.tabBarItem.titlePositionAdjustment = UIOffsetMake(0, -4);
-        
-        MessageViewController *message = [[MessageViewController alloc] init];
-        message.title = @"消息";
-        message.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"消息" image:[UIImage imageNamed:@"tabbar_message_center"] tag:2];
-        message.tabBarItem.titlePositionAdjustment = UIOffsetMake(0, -4);
-        
-        MineViewController *mine = [[MineViewController alloc] init];
-        mine.title = @"我的";
-        mine.tabBarItem = [[UITabBarItem alloc] initWithTitle:@"我的" image:[UIImage imageNamed:@"tabbar_profile"] tag:1];
-        mine.tabBarItem.titlePositionAdjustment = UIOffsetMake(0, -4);
-        
-        self.viewControllers = @[home, discover, message, mine];
-    }
-    return self;
+- (void)viewDidLoad {
+    UIViewController * leftSideDrawerViewController = [[SideMenuViewController alloc] init];
+    UIViewController * centerViewController = [[HomeViewController alloc] init];
+    UINavigationController * navigationController = [[UINavigationController alloc] initWithRootViewController:centerViewController];
+    [navigationController setRestorationIdentifier:@"MECenterNavigationControllerRestorationKey"];
+    UINavigationController * leftSideNavController = [[UINavigationController alloc] initWithRootViewController:leftSideDrawerViewController];
+    [leftSideNavController setRestorationIdentifier:@"MELeftNavigationControllerRestorationKey"];
+    self.drawerController = [[MMDrawerController alloc]
+                             initWithCenterViewController:navigationController
+                             leftDrawerViewController:leftSideNavController
+                             rightDrawerViewController:nil];
+    [self.drawerController setShowsShadow:YES];
+    [self.drawerController setMaximumLeftDrawerWidth:200.0f];
+    [self.drawerController setRestorationIdentifier:@"MEDrawer"];
+    [self.drawerController setOpenDrawerGestureModeMask:MMOpenDrawerGestureModeAll];
+    [self.drawerController setCloseDrawerGestureModeMask:MMCloseDrawerGestureModeAll];
+    [self.drawerController setShouldStretchDrawer:NO];
+    [self.view addSubview:self.drawerController.view];
 }
 
 @end

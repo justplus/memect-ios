@@ -8,10 +8,13 @@
 
 #import "HomeViewController.h"
 #import "Account.h"
+#import "User.h"
 #import "MERequestTool.h"
 #import "NSDictionary+Json.h"
 #import "MemectThread.h"
 #import "ThreadCell.h"
+#import "UIViewController+MMDrawerController.h"
+#import "MMDrawerBarButtonItem.h"
 
 #define MEMECT_URL      @"http://memect.sinaapp.com/api"
 
@@ -41,13 +44,17 @@
     [self.tableView setBackgroundColor:[UIColor whiteColor]];
     [self.tableView setSeparatorStyle:UITableViewCellSeparatorStyleNone];
     // 设置导航条
-    NSArray *segmentTitle = [[NSArray alloc]initWithObjects:@"专题焦点", @"行业动态", nil];
+    NSArray *segmentTitle = [[NSArray alloc]initWithObjects:@"今日焦点", @"最近动态", nil];
     UISegmentedControl *segmentedControl = [[UISegmentedControl alloc] initWithItems:segmentTitle];
     segmentedControl.selectedSegmentIndex = 0;
     segmentedControl.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     [segmentedControl addTarget:self action:@selector(segmentAction:) forControlEvents:UIControlEventValueChanged];
     self.navigationItem.titleView = segmentedControl;
-    
+    // 设置导航条左边按钮
+    MMDrawerBarButtonItem * leftDrawerButton = [[MMDrawerBarButtonItem alloc] initWithTarget:self action:@selector(leftDrawerButtonPress:)];
+    UIBarButtonItem *negativeSpacer = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
+    negativeSpacer.width = -10;
+    self.navigationItem.leftBarButtonItems = @[negativeSpacer, leftDrawerButton];
 }
 
 // 初始化变量
@@ -69,7 +76,9 @@
     [_loadingView startAnimating];
     
     Account *account = [[Account alloc] initWithArchiever];
-    NSString *memect_list_url = [NSString stringWithFormat:@"%@/user/%lld/category/%d/page/%d", MEMECT_URL, account.uid, category, page];
+    User *user = [[User alloc] initWithDictionary:account.userInfo];
+    NSString *memect_list_url = [NSString stringWithFormat:@"%@/user/%lld/category/%d/page/%d", MEMECT_URL,
+                                 user.id, category, page];
     [MERequestTool GET:memect_list_url parameters:nil response:@"json" success:^(id responseObject) {
         if ([responseObject isKindOfClass:[NSDictionary class]]) {
             [_loadingView stopAnimating];
@@ -115,8 +124,14 @@
 
 #pragma mark - gc
 - (void)didReceiveMemoryWarning {
+    [super didReceiveMemoryWarning];
     // 收到内存警告时，清除缓存
     _cache = nil;
+}
+
+#pragma mark - Button Handlers
+-(void)leftDrawerButtonPress:(id)sender{
+    [self.mm_drawerController toggleDrawerSide:MMDrawerSideLeft animated:YES completion:nil];
 }
 
 #pragma mark - tableview delegate

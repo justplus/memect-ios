@@ -168,7 +168,11 @@
         _index.font = [UIFont systemFontOfSize:12.0f];
         _index.textColor = [UIColor grayColor];
         _index.textAlignment = NSTextAlignmentCenter;
-        _index.backgroundColor = [UIColor orangeColor];
+        UIColor * indexColor = [UIColor colorWithRed:29.0/255.0
+                                               green:173.0/255.0
+                                                blue:234.0/255.0
+                                             alpha:1.0];
+        _index.backgroundColor = indexColor;
         _index.textColor = [UIColor whiteColor];
         _index.translatesAutoresizingMaskIntoConstraints = NO;
     }
