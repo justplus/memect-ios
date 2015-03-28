@@ -8,8 +8,10 @@
 
 #import "Account.h"
 #import "NSDictionary+Json.h"
+#import "MERequestTool.h"
 
 #define ACCOUNT_FILE_PATH [[NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject] stringByAppendingPathComponent:@"memect_account.plist"]
+#define GET_USER_URL    @"https://api.weibo.com/2/users/show.json"
 
 @implementation Account
 
@@ -22,6 +24,7 @@
         self.expiresIn = [aDecoder decodeObjectForKey:@"expires_in"];
         self.uid = [aDecoder decodeInt64ForKey:@"uid"];
         self.expiresTime = [aDecoder decodeObjectForKey:@"expires_time"];
+        self.userInfo = [aDecoder decodeObjectForKey:@"user_info"];
     }
     return self;
 }
@@ -31,6 +34,7 @@
     [aCoder encodeObject:self.expiresIn forKey:@"expires_in"];
     [aCoder encodeInt64:self.uid forKey:@"uid"];
     [aCoder encodeObject:self.expiresTime forKey:@"expires_time"];
+    [aCoder encodeObject:self.userInfo forKey:@"user_info"];
 }
 
 #pragma mark - initilization

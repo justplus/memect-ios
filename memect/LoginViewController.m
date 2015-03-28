@@ -10,9 +10,9 @@
 #import "MERequestTool.h"
 #import "Account.h"
 #import "User.h"
-#import "FrameViewController.h"
 #import "NSDictionary+Json.h"
 #import "Util.h"
+#import "FrameViewController.h"
 #import <MBProgressHUD/MBProgressHUD.h>
 
 #define OAUTH_URL           @"https://api.weibo.com/oauth2/authorize"
@@ -82,15 +82,17 @@
         userSaveParameters[@"weibo_uid"] = @(account.uid);
         // 根据uid获取用户详细信息
         [MERequestTool GET:GET_USER_URL parameters:@{@"access_token": account.accessToken, @"uid": @(account.uid)} response:@"json" success:^(id responseObject) {
-            //User *currentUser = [[User alloc] initWithDictionary:responseObject];
-            NSError *error;
-            NSData *data = [NSJSONSerialization dataWithJSONObject:responseObject options:0 error:&error];
+            //User *userInfo = [[User alloc] initWithDictionary:responseObject];
+            account.userInfo = responseObject;
+            
+            NSData *data = [NSJSONSerialization dataWithJSONObject:responseObject options:0 error:nil];
             if(data){
                 NSString *jsonString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                 userSaveParameters[@"user_info"] = jsonString;
                 [MERequestTool POST:SAVE_USER_URL parameters:userSaveParameters response:@"json" success:^(id responseObject) {
                     if([responseObject intValueForKey:@"status"] == 1) {
                         [account saveAccount];
+                        
                         FrameViewController *frameViewController = [[FrameViewController alloc] init];
                         [self presentViewController:frameViewController animated:YES completion:^{
                             
@@ -104,10 +106,6 @@
                     [Util showExceptionDialog:@"出现异常" view:self.view];
                     NSLog(@"saveUser Error: %@", error);
                 }];
-            }
-            else{
-                [Util showExceptionDialog:@"序列化出现异常" view:self.view];
-                NSLog(@"json serialization error");
             }
         } failure:^(NSError *error) {
             [Util showExceptionDialog:@"获取用户信息出现异常" view:self.view];

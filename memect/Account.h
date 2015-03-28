@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "User.h"
 
 @interface Account : NSObject<NSCoding>
 
@@ -14,6 +15,7 @@
 @property(nonatomic, strong)NSString *expiresIn;
 @property(nonatomic, strong)NSDate *expiresTime;
 @property(nonatomic, assign)long long uid;
+@property(nonatomic, copy)NSDictionary *userInfo;
 
 - (instancetype)initWithDictionary:(NSDictionary *)account;
 - (instancetype)initWithString:(NSString *)jsonString;

@@ -8,6 +8,7 @@
 
 #import "AppDelegate.h"
 #import "Account.h"
+#import "User.h"
 #import "LoginViewController.h"
 #import "FrameViewController.h"
 
@@ -23,10 +24,16 @@
     [self.window makeKeyAndVisible];
     //判断是否进行过授权
     Account *account = [[Account alloc] initWithArchiever];
-    if (account && [[NSDate date] compare:account.expiresTime]) {
+    User *user = [[User alloc] initWithDictionary:account.userInfo];
+    if (user && [[NSDate date] compare:account.expiresTime]) {
         //获取登陆用户的信息
-        FrameViewController *frameViewController = [[FrameViewController alloc] init];
-        self.window.rootViewController = frameViewController;
+        
+        UIColor * tintColor = [UIColor colorWithRed:29.0/255.0
+                                              green:173.0/255.0
+                                               blue:234.0/255.0
+                                              alpha:1.0];
+        [self.window setTintColor:tintColor];
+        self.window.rootViewController = [[FrameViewController alloc] init];
     }
     else{
         self.window.rootViewController = [[LoginViewController alloc] init];

@@ -15,6 +15,8 @@
 
 @interface DiscoverViewController ()
 
+@property(nonatomic, strong)UIScrollView *scrollView;
+
 @end
 
 @implementation DiscoverViewController
@@ -28,6 +30,19 @@
 - (void)setupView {
     self.navigationItem.title = @"订阅";
     [self.view setBackgroundColor:[UIColor whiteColor]];
+    // 添加滚动条
+    self.scrollView = [[UIScrollView alloc] initWithFrame:CGRectMake(0, 0, self.view.frame.size.width,
+                                                                             self.view.frame.size.height)];
+    self.scrollView.directionalLockEnabled = YES;
+    self.scrollView.pagingEnabled = NO;
+    self.scrollView.backgroundColor = [UIColor whiteColor];
+    self.scrollView.showsVerticalScrollIndicator =YES;
+    self.scrollView.indicatorStyle = UIScrollViewIndicatorStyleDefault;
+    self.scrollView.showsHorizontalScrollIndicator = NO;
+    CGSize newSize = CGSizeMake(self.view.frame.size.width, self.view.frame.size.height+1);
+    [self.scrollView setContentSize:newSize];
+    
+    [self.view addSubview:self.scrollView];
 }
 
 - (void)setupData {
@@ -36,7 +51,7 @@
         int status = [result intValueForKey:@"status"];
         if (status == 1) {
             NSDictionary *data = [result dictionaryValueForKey:@"data"];
-            // int total = [data intValueForKey:@"total"];
+            int total = [data intValueForKey:@"total"];
             int index = 0;
             float frameX, frameY;
             for (NSDictionary *dict in [data arrayValueForKey:@"types"]) {
@@ -44,14 +59,21 @@
                     frameX = 0;
                 }
                 else {
-                    frameX = self.view.frame.size.width/2;
+                    frameX = self.scrollView.frame.size.width/2;
                 }
                 frameY = index/2*160;
                 index++;
-                METypeCell *cell = [[METypeCell alloc] initWithFrame:CGRectMake(frameX, frameY + 60, self.view.frame.size.width/2, 160)];
+                METypeCell *cell = [[METypeCell alloc] initWithFrame:CGRectMake(frameX, frameY , self.scrollView.frame.size.width/2, 160)];
                 MemectType *type = [[MemectType alloc] initWithDictionary:dict];
                 cell.type = type;
-                [self.view addSubview:cell];
+                [self.scrollView addSubview:cell];
+            }
+            // 重新计算scrollview的contentSize
+            if (total % 2 == 0) {
+                [self.scrollView setContentSize:CGSizeMake(self.view.frame.size.width, total/2*160 + 10)];
+            }
+            else {
+                [self.scrollView setContentSize:CGSizeMake(self.view.frame.size.width, (total/2+1)*160 + 10)];
             }
         }
         else {
