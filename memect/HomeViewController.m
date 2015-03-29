@@ -145,6 +145,7 @@
         cell = [[ThreadCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"threadCell"];
     }
     cell.selectionStyle = UITableViewCellEditingStyleNone;
+    
     cell.thread = [_dataArray objectAtIndex:indexPath.row];
     return cell;
 }

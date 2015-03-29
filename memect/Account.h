@@ -16,7 +16,7 @@
 @property(nonatomic, strong)NSDate *expiresTime;
 @property(nonatomic, assign)long long uid;
 @property(nonatomic, copy)NSDictionary *userInfo;
-@property(nonatomic, copy)NSArray *memectTypes;
+@property(nonatomic, copy)NSMutableArray *memectTypes;
 
 
 - (instancetype)initWithDictionary:(NSDictionary *)account;

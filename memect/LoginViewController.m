@@ -7,7 +7,7 @@
 //
 
 #import "LoginViewController.h"
-
+#import "MemectType.h"
 
 @interface LoginViewController ()<UIWebViewDelegate>
 
@@ -76,7 +76,7 @@
                 userSaveParameters[@"user_info"] = jsonString;
                 [MERequestTool POST:SAVE_USER_URL parameters:userSaveParameters response:@"json" success:^(id responseObject) {
                     if([responseObject intValueForKey:@"status"] == 1) {
-                        [account saveAccount];
+                        //[account saveAccount];
                         // 获取用户订阅列表并缓存
                         NSString *getMemectTypeUrl = [NSString stringWithFormat:@"%@%lld", GET_MEMECT_LIST, account.uid];
                         [MERequestTool GET:getMemectTypeUrl parameters:nil response:@"json" success:^(id responseObject) {
@@ -85,31 +85,40 @@
                             if (status == 1) {
                                 NSDictionary *data = [result dictionaryValueForKey:@"data"];
                                 //int total = [data intValueForKey:@"total"];
-                                NSArray *types = [data arrayValueForKey:@"types"];
-                                account.memectTypes = types;
+                                NSMutableArray *types = [[NSMutableArray alloc] init];
+                                for (NSDictionary *dict in [data arrayValueForKey:@"types"]) {
+                                    [types addObject:[[MemectType alloc] initWithDictionary:dict]];
+                                }
+                                account.memectTypes = [types copy];
+                                [account saveAccount];
+                                FrameViewController *frameViewController = [[FrameViewController alloc] init];
+                                [self presentViewController:frameViewController animated:YES completion:^{
+                                    
+                                }];
                             }
                         } failure:^(NSError *error) {
                             NSLog(@"getMememType Error:%@", error);
                         }];
-                        FrameViewController *frameViewController = [[FrameViewController alloc] init];
-                        [self presentViewController:frameViewController animated:YES completion:^{
-                            
-                        }];
+                        
                     }
                     else {
+                        [self.hud removeFromSuperview];
                         [Util showExceptionDialog:@"出现未知异常..." view:self.view];
                         NSLog(@"saveUserToDB Error");
                     }
                 } failure:^(NSError *error) {
+                    [self.hud removeFromSuperview];
                     [Util showExceptionDialog:@"服务器去开小差了, 稍后再试!" view:self.view];
                     NSLog(@"saveUser Error: %@", error);
                 }];
             }
         } failure:^(NSError *error) {
+            [self.hud removeFromSuperview];
             [Util showExceptionDialog:@"获取用户信息出现异常" view:self.view];
             NSLog(@"getUser Error:%@", error);
         }];
     } failure:^(NSError *error) {
+        [self.hud removeFromSuperview];
         [Util showExceptionDialog:@"授权失败" view:self.view];
         NSLog(@"Error: %@", error);
     }];

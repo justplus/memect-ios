@@ -25,6 +25,7 @@
         self.uid = [aDecoder decodeInt64ForKey:@"uid"];
         self.expiresTime = [aDecoder decodeObjectForKey:@"expires_time"];
         self.userInfo = [aDecoder decodeObjectForKey:@"user_info"];
+        self.memectTypes = [aDecoder decodeObjectForKey:@"memect_types"];
     }
     return self;
 }
@@ -35,6 +36,7 @@
     [aCoder encodeInt64:self.uid forKey:@"uid"];
     [aCoder encodeObject:self.expiresTime forKey:@"expires_time"];
     [aCoder encodeObject:self.userInfo forKey:@"user_info"];
+    [aCoder encodeObject:self.memectTypes forKey:@"memect_types"];
 }
 
 #pragma mark - initilization
@@ -61,7 +63,7 @@
 
 #pragma mark - get and set account
 - (void)saveAccount {
-    [NSKeyedArchiver archiveRootObject:self toFile:ACCOUNT_FILE_PATH];
+    BOOL r = [NSKeyedArchiver archiveRootObject:self toFile:ACCOUNT_FILE_PATH];
 }
 
 - (instancetype)initWithArchiever {
@@ -79,9 +81,9 @@
     [self saveAccount];
 }*/
 
-- (void)setMemectTypes:(NSMutableArray *)memectTypes {
+/*- (void)setMemectTypes:(NSMutableArray *)memectTypes {
     _memectTypes = memectTypes;
     [self saveAccount];
-}
+}*/
 
 @end

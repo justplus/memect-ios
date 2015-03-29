@@ -11,6 +11,7 @@
 #import "UIImageView+WebCache.h"
 #import "DWTagList.h"
 #import "UIView+UpdateAutoLayoutConstraints.h"
+#import "METextView.h"
 
 // 索引块大小
 #define INDEX_SIZE 16
@@ -28,9 +29,9 @@
 // 分享者头像
 @property(nonatomic, strong)UIImageView *userAvatar;
 // 分享内容
-@property(nonatomic, strong)UITextView *status;
+@property(nonatomic, strong)METextView *status;
 // 原分享内容
-@property(nonatomic, strong)UITextView *retweetStatus;
+@property(nonatomic, strong)METextView *retweetStatus;
 // 分享配图
 @property(nonatomic, strong)MEImageGrid *thumbnails;
 // 分享者信息
@@ -126,17 +127,17 @@
         [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.thumbnails attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:self.contentView attribute:NSLayoutAttributeTop multiplier:1.0f constant:self.height]];
         [self.contentView addConstraint:[NSLayoutConstraint constraintWithItem:self.thumbnails attribute:NSLayoutAttributeHeight relatedBy:NSLayoutRelationEqual toItem:nil attribute:NSLayoutAttributeNotAnAttribute multiplier:1.0f constant:self.thumbnails.height]];
         
-        self.height += self.thumbnails.height + THUMBNAIL_MARGIN;
+        self.height += self.thumbnails.height;
     }
     
     if ([thread.tags count] > 0) {
         self.tags = nil;
-        self.tags = [[DWTagList alloc] initWithFrame:CGRectMake(8 + INDEX_SIZE + 8, self.height,
-                                                                self.contentView.frame.size.width - 16 - INDEX_SIZE, 0.0f)];
+        self.tags = [[DWTagList alloc] initWithFrame:CGRectMake(8 + INDEX_SIZE + 8, self.height + THUMBNAIL_MARGIN,
+                                                                self.contentView.frame.size.width - 24 - INDEX_SIZE, 0.0f)];
         [self.contentView addSubview:self.tags];
         [self.tags setTags:[[NSArray alloc] initWithArray:thread.tags]];
         CGSize tagsSize = self.tags.fittedSize;
-        self.height += tagsSize.height;
+        self.height += tagsSize.height + THUMBNAIL_MARGIN * 2;
     }
     
     [self.userAvatar sd_setImageWithURL:[NSURL URLWithString:thread.weiboContent.user.profileImageUrl] placeholderImage:[UIImage imageNamed:@"tabbar_profile"]];
@@ -146,7 +147,7 @@
     [self.shareInfo setText:info];
     self.height += USER_AVATAR_SIZE;
     
-    self.height = self.height + 8 + SEPERATOR_HEIGHT + 8;
+    self.height = self.height + 8*2 + SEPERATOR_HEIGHT;
 }
 
 - (NSString *)dateInFormat:(time_t)dateTime format:(NSString*)stringFormat
@@ -192,9 +193,9 @@
     return _userAvatar;
 }
 
-- (UITextView *)status {
+- (METextView *)status {
     if (!_status) {
-        _status = [UITextView new];
+        _status = [METextView new];
         [_status setEditable:NO];
         [_status setScrollEnabled:NO];
         _status.font = [UIFont systemFontOfSize:14.0f];
@@ -206,9 +207,9 @@
     return _status;
 }
 
-- (UITextView *)retweetStatus {
+- (METextView *)retweetStatus {
     if (!_retweetStatus) {
-        _retweetStatus = [UITextView new];
+        _retweetStatus = [METextView new];
         [_retweetStatus setEditable:NO];
         [_retweetStatus setScrollEnabled:NO];
         _retweetStatus.font = [UIFont systemFontOfSize:14.0f];
@@ -248,4 +249,5 @@
     }
     return _seperator;
 }
+
 @end
