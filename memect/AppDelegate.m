@@ -26,7 +26,44 @@
     Account *account = [[Account alloc] initWithArchiever];
     User *user = [[User alloc] initWithDictionary:account.userInfo];
     if (user && [[NSDate date] compare:account.expiresTime]) {
-        //获取登陆用户的信息
+        // 即便已经缓存了数据, 但是仍然要同步数据，因为数据可能会在其他地方发生变化
+        [MERequestTool GET:GET_USER_URL parameters:@{@"access_token": account.accessToken, @"uid": @(account.uid)} response:@"json" success:^(id responseObject) {
+            account.userInfo = responseObject;
+            
+            NSData *data = [NSJSONSerialization dataWithJSONObject:responseObject options:0 error:nil];
+            if(data){
+                NSString *jsonString = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                NSMutableDictionary *userSaveParameters = [NSMutableDictionary dictionary];
+                userSaveParameters[@"weibo_uid"] = @(account.uid);
+                userSaveParameters[@"user_info"] = jsonString;
+                [MERequestTool POST:SAVE_USER_URL parameters:userSaveParameters response:@"json" success:^(id responseObject) {
+                    if([responseObject intValueForKey:@"status"] == 1) {
+                        [account saveAccount];
+                        // 获取用户订阅列表并缓存
+                        NSString *getMemectTypeUrl = [NSString stringWithFormat:@"%@%lld", GET_MEMECT_LIST, account.uid];
+                        [MERequestTool GET:getMemectTypeUrl parameters:nil response:@"json" success:^(id responseObject) {
+                            NSDictionary *result = (NSDictionary *)responseObject;
+                            int status = [result intValueForKey:@"status"];
+                            if (status == 1) {
+                                NSDictionary *data = [result dictionaryValueForKey:@"data"];
+                                //int total = [data intValueForKey:@"total"];
+                                NSArray *types = [data arrayValueForKey:@"types"];
+                                account.memectTypes = types;
+                            }
+                        } failure:^(NSError *error) {
+                            NSLog(@"getMememType Error:%@", error);
+                        }];
+                    }
+                    else {
+                        NSLog(@"saveUserToDB Error");
+                    }
+                } failure:^(NSError *error) {
+                    NSLog(@"saveUser Error: %@", error);
+                }];
+            }
+        } failure:^(NSError *error) {
+            NSLog(@"getUser Error:%@", error);
+        }];
         
         UIColor * tintColor = [UIColor colorWithRed:29.0/255.0
                                               green:173.0/255.0

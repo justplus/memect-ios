@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface MemectType : NSObject
+@interface MemectType : NSObject<NSCoding>
 
 // 编号
 @property(nonatomic, assign)int id;

@@ -16,7 +16,7 @@
 @implementation Account
 
 
-#pragma mark - coder and decoder
+#pragma mark - nscoding delegate
 - (id)initWithCoder:(NSCoder *)aDecoder {
     self = [super init];
     if (self) {
@@ -71,6 +71,17 @@
     }
     return self;
     
+}
+
+#pragma mark - property
+/*- (void)setUserInfo:(NSDictionary *)userInfo {
+    _userInfo = userInfo;
+    [self saveAccount];
+}*/
+
+- (void)setMemectTypes:(NSMutableArray *)memectTypes {
+    _memectTypes = memectTypes;
+    [self saveAccount];
 }
 
 @end

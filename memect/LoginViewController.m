@@ -7,22 +7,7 @@
 //
 
 #import "LoginViewController.h"
-#import "MERequestTool.h"
-#import "Account.h"
-#import "User.h"
-#import "NSDictionary+Json.h"
-#import "Util.h"
-#import "FrameViewController.h"
-#import <MBProgressHUD/MBProgressHUD.h>
 
-#define OAUTH_URL           @"https://api.weibo.com/oauth2/authorize"
-#define APP_KEY             @"3865813480"
-#define APP_SECRET          @"d6ead21a4c4196cfc7cf9e18fe41b5da"
-#define REDIRECT_URL        @"http://memect.zhaoliang.info"
-#define ACCESS_TOKEN_URL    @"https://api.weibo.com/oauth2/access_token"
-
-#define GET_USER_URL        @"https://api.weibo.com/2/users/show.json"
-#define SAVE_USER_URL       @"http://memect.sinaapp.com/api/user"
 
 @interface LoginViewController ()<UIWebViewDelegate>
 
@@ -92,18 +77,31 @@
                 [MERequestTool POST:SAVE_USER_URL parameters:userSaveParameters response:@"json" success:^(id responseObject) {
                     if([responseObject intValueForKey:@"status"] == 1) {
                         [account saveAccount];
-                        
+                        // 获取用户订阅列表并缓存
+                        NSString *getMemectTypeUrl = [NSString stringWithFormat:@"%@%lld", GET_MEMECT_LIST, account.uid];
+                        [MERequestTool GET:getMemectTypeUrl parameters:nil response:@"json" success:^(id responseObject) {
+                            NSDictionary *result = (NSDictionary *)responseObject;
+                            int status = [result intValueForKey:@"status"];
+                            if (status == 1) {
+                                NSDictionary *data = [result dictionaryValueForKey:@"data"];
+                                //int total = [data intValueForKey:@"total"];
+                                NSArray *types = [data arrayValueForKey:@"types"];
+                                account.memectTypes = types;
+                            }
+                        } failure:^(NSError *error) {
+                            NSLog(@"getMememType Error:%@", error);
+                        }];
                         FrameViewController *frameViewController = [[FrameViewController alloc] init];
                         [self presentViewController:frameViewController animated:YES completion:^{
                             
                         }];
                     }
                     else {
-                        [Util showExceptionDialog:@"出现异常" view:self.view];
+                        [Util showExceptionDialog:@"出现未知异常..." view:self.view];
                         NSLog(@"saveUserToDB Error");
                     }
                 } failure:^(NSError *error) {
-                    [Util showExceptionDialog:@"出现异常" view:self.view];
+                    [Util showExceptionDialog:@"服务器去开小差了, 稍后再试!" view:self.view];
                     NSLog(@"saveUser Error: %@", error);
                 }];
             }
@@ -116,6 +114,7 @@
         NSLog(@"Error: %@", error);
     }];
 }
+
 
 #pragma mark - webview delegate
 - (void)webViewDidStartLoad:(UIWebView *)webView
