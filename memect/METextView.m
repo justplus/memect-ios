@@ -28,14 +28,15 @@
     [attributeString addAttributes:fullAttributes range:NSMakeRange(0, [text length])];
     
     //遍历text，利用正则表达式获取所需的字符串，并存在数组里
-    NSString *linkPattern = @"(([http]+://?|www[.])[^\\s()<>]+(?:\\([\\w\\d]+\\)|([^[:punct:]\\s]|/)))[\\x00-\\xff]";
+    //NSString *linkPattern = @"(([http]+://?|www[.])[^\\s()<>]+(?:\\([\\w\\d]+\\)|([^[:punct:]\\s]|/)))[\\x00-\\xff]";
+    NSString *linkPattern = @"http://t.cn/[a-zA-Z0-9]{7}";
     NSArray *linkMatches = [self scanString:linkPattern searchText:text];
     NSString *atPattern = @"@[\\u4e00-\\u9fa5\\w\\-]+";
     NSArray *usernameMatches = [self scanString:atPattern searchText:text];
     NSString *hashtagPattern = @"#([^\\#|.]+)#";
     NSArray *hashtagMatches = [self scanString:hashtagPattern searchText:text];
-    NSString *emojiPattern = @"\\[([^\\#|.]+)\\]";
-    NSArray *emojiMathces = [self scanString:emojiPattern searchText:text];
+    //NSString *emojiPattern = @"\\[([^\\#|.]+)\\]";
+    //NSArray *emojiMathces = [self scanString:emojiPattern searchText:text];
     
     //为链接添加属性（颜色、字体……）
     NSDictionary *MatchAttr = [[NSDictionary alloc] initWithObjectsAndKeys:
@@ -47,6 +48,7 @@
         
         if (range.location != NSNotFound) {
             [attributeString addAttributes:MatchAttr range:range];
+            [attributeString addAttribute:NSLinkAttributeName value:usernameMatchedString range:range];
         }
     }
     
@@ -55,23 +57,25 @@
         
         if (range.location != NSNotFound) {
             [attributeString addAttributes:MatchAttr range:range];
+            [attributeString addAttribute:NSLinkAttributeName value:hashtagMatchedString range:range];
         }
     }
     
-    for (NSString *emojiMatchedString in emojiMathces) {
+    /*for (NSString *emojiMatchedString in emojiMathces) {
         NSRange range = [text rangeOfString:emojiMatchedString];
         
         if (range.location != NSNotFound) {
             [attributeString addAttributes:MatchAttr range:range];
         }
-    }
+    }*/
     
     
     for (int i=(int)linkMatches.count-1; i >= 0; i--) {
         NSRange range = [text rangeOfString:linkMatches[i]];
         if (range.location != NSNotFound) {
             [attributeString addAttributes:MatchAttr range:range];
-            [attributeString replaceCharactersInRange:range withString:@"☞链接"];
+            [attributeString addAttribute:NSLinkAttributeName value:linkMatches[i] range:range];
+            [attributeString replaceCharactersInRange:range withString:@"☞链接 "];
         }
     }
     

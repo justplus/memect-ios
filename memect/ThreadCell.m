@@ -16,11 +16,15 @@
 // 索引块大小
 #define INDEX_SIZE 16
 // 缩略图上下边距
-#define THUMBNAIL_MARGIN 5
+#define THUMBNAIL_MARGIN 8
 // 头像大小
 #define USER_AVATAR_SIZE 20
-// 分割线高度
-#define SEPERATOR_HEIGHT 0.5f
+// button高度
+#define BUTTON_HEIGHT 27
+// 按钮分割线宽度
+#define BUTTON_SEPERATOR_WIDTH 0.5f
+// 按钮背景颜色
+#define BUTTON_BACKGROUND_COLOR [UIColor colorWithRed:0.93 green:0.93 blue:0.93 alpha:1.00]
 
 
 @interface ThreadCell()
@@ -38,8 +42,16 @@
 @property(nonatomic, strong)UILabel *shareInfo;
 // 标签
 @property(nonatomic, strong)DWTagList *tags;
-// 分割线
-@property(nonatomic, strong)UIView *seperator;
+// 评论按钮
+@property(nonatomic, strong)UIButton *commentButton;
+// 转发按钮
+@property(nonatomic, strong)UIButton *retweetButton;
+// 收藏按钮
+@property(nonatomic, strong)UIButton *collectButton;
+// 稍后阅读按钮
+@property(nonatomic, strong)UIButton *laterReadButton;
+// 按钮间隔线
+@property(nonatomic, strong)UIView *buttonSeperator;
 @end
 
 @implementation ThreadCell
@@ -58,25 +70,36 @@
     [self.contentView addSubview:self.userAvatar];
     [self.contentView addSubview:self.status];
     [self.contentView addSubview:self.shareInfo];
-    [self.contentView addSubview:self.seperator];
+    [self.contentView addSubview:self.commentButton];
+    [self.contentView addSubview:self.retweetButton];
+    [self.contentView addSubview:self.collectButton];
+    [self.contentView addSubview:self.laterReadButton];
+    [self.contentView addSubview:self.buttonSeperator];
     // add constraints for all subviews
-    NSDictionary *vars = NSDictionaryOfVariableBindings(_index, _userAvatar, _status, _shareInfo, _seperator);
-    NSDictionary *metrics = @{@"indexSize":@INDEX_SIZE, @"userAvatarSize":@USER_AVATAR_SIZE, @"seperatorHeight":@SEPERATOR_HEIGHT};
+    NSDictionary *vars = NSDictionaryOfVariableBindings(_index, _userAvatar, _status, _shareInfo, _commentButton, _retweetButton, _collectButton, _laterReadButton, _buttonSeperator);
+    NSDictionary *metrics = @{@"indexSize":@INDEX_SIZE, @"userAvatarSize":@USER_AVATAR_SIZE,
+                              @"buttonHeight":@BUTTON_HEIGHT, @"buttonSeperatorWidth":@BUTTON_SEPERATOR_WIDTH};
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
                                       @"H:|-[_index(==indexSize)]-[_status]-(>=0)-|" options:0 metrics:metrics views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"V:|-(==0)-[_index(==indexSize)]" options:0 metrics:metrics views:vars]];
+                                      @"V:|-[_index(==indexSize)]" options:0 metrics:metrics views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
                                       @"H:|-(>=0)-[_status]-|" options:0 metrics:0 views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"H:|-[_index]-[_userAvatar(==userAvatarSize)]-[_shareInfo]-(>=0)-|" options:0 metrics:metrics views:vars]];
+                                      @"H:|-[_userAvatar(==userAvatarSize)]-[_shareInfo]-(>=0)-|" options:0 metrics:metrics views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"V:|-(>=0)-[_userAvatar(==userAvatarSize)]-[_seperator(==seperatorHeight)]-|" options:0 metrics:metrics views:vars]];
+                                      @"V:|-(>=0)-[_userAvatar(==userAvatarSize)]-[_commentButton(==buttonHeight)]-|" options:0 metrics:metrics views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"V:|-(>=0)-[_shareInfo(==userAvatarSize)]-[_seperator(==seperatorHeight)]-|" options:0 metrics:metrics views:vars]];
+                                      @"V:|-(>=0)-[_shareInfo(==userAvatarSize)]-[_commentButton]-|" options:0 metrics:metrics views:vars]];
     [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
-                                      @"V:|-(==0)-[_status]-(>=0)-[_userAvatar]" options:0 metrics:0 views:vars]];
-    [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_index]-[_seperator]-|" options:0 metrics:0 views:vars]];
+                                      @"V:[_retweetButton(==buttonHeight)]-|" options:0 metrics:metrics views:vars]];
+    [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
+                                      @"V:[_collectButton(==buttonHeight)]-|" options:0 metrics:metrics views:vars]];
+    [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
+                                      @"V:[_laterReadButton(==buttonHeight)]-|" options:0 metrics:metrics views:vars]];
+    [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:
+                                      @"V:|-[_status]-(>=0)-[_userAvatar]" options:0 metrics:0 views:vars]];
+    [self.contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|-[_commentButton]-(==buttonSeperatorWidth)-[_retweetButton(==_commentButton)]-(==buttonSeperatorWidth)-[_collectButton(==_commentButton)]-(==buttonSeperatorWidth)-[_laterReadButton(==_commentButton)]-|" options:0 metrics:metrics views:vars]];
     
 }
 
@@ -87,9 +110,10 @@
     [self.thumbnails removeFromSuperview];
     [self.tags removeFromSuperview];
     
-    self.height = 0;
+    self.height = 8;
     [self.index setText:[NSString stringWithFormat:@"%d", thread.index]];
     [self.status setText:thread.weiboContent.text];
+    self.status.delegate = self;
     CGFloat weiboContentWidth = self.contentView.frame.size.width - INDEX_SIZE - 3*8;
     CGSize weiboContentSize = [self.status sizeThatFits:CGSizeMake(weiboContentWidth, CGFLOAT_MAX)];
     self.height += weiboContentSize.height + 1;
@@ -137,7 +161,7 @@
         [self.contentView addSubview:self.tags];
         [self.tags setTags:[[NSArray alloc] initWithArray:thread.tags]];
         CGSize tagsSize = self.tags.fittedSize;
-        self.height += tagsSize.height + THUMBNAIL_MARGIN * 2;
+        self.height += tagsSize.height + THUMBNAIL_MARGIN;
     }
     
     [self.userAvatar sd_setImageWithURL:[NSURL URLWithString:thread.weiboContent.user.profileImageUrl] placeholderImage:[UIImage imageNamed:@"tabbar_profile"]];
@@ -147,7 +171,7 @@
     [self.shareInfo setText:info];
     self.height += USER_AVATAR_SIZE;
     
-    self.height = self.height + 8*2 + SEPERATOR_HEIGHT;
+    self.height = self.height + 8*2 + BUTTON_HEIGHT;
 }
 
 - (NSString *)dateInFormat:(time_t)dateTime format:(NSString*)stringFormat
@@ -158,6 +182,25 @@
     timeinfo = localtime(&dateTime);
     strftime(buffer, 80, format, timeinfo);
     return [NSString  stringWithCString:buffer encoding:NSUTF8StringEncoding];
+}
+
+- (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL *)URL inRange:(NSRange)characterRange {
+    NSString *tapedString = [textView.text substringWithRange:characterRange];
+    NSRange topicRange = [tapedString rangeOfString:@"#"];
+    if (topicRange.location != NSNotFound && topicRange.location == 0) {
+        // 话题
+        return NO;
+    }
+    NSRange atRange = [tapedString rangeOfString:@"@"];
+    if (atRange.location != NSNotFound && atRange.location == 0) {
+        // at
+        return NO;
+    }
+    if ([[URL scheme] isEqualToString:@"http"]) {
+        // 链接
+        return NO;
+    }
+    return YES;
 }
 
 
@@ -241,13 +284,61 @@
     return _shareInfo;
 }
 
-- (UIView *)seperator {
-    if (!_seperator) {
-        _seperator = [UIView new];
-        _seperator.backgroundColor = [UIColor grayColor];
-        _seperator.translatesAutoresizingMaskIntoConstraints = NO;
+- (UIButton *)commentButton {
+    if (!_commentButton) {
+        _commentButton = [UIButton new];
+        [_commentButton setTitle:@"评论" forState:UIControlStateNormal];
+        [_commentButton setBackgroundColor:BUTTON_BACKGROUND_COLOR];
+        [_commentButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [_commentButton.titleLabel setFont:[UIFont systemFontOfSize:12.0f]];
+        _commentButton.translatesAutoresizingMaskIntoConstraints = NO;
     }
-    return _seperator;
+    return _commentButton;
+}
+
+- (UIButton *)retweetButton {
+    if (!_retweetButton) {
+        _retweetButton = [UIButton new];
+        [_retweetButton setTitle:@"转发" forState:UIControlStateNormal];
+        [_retweetButton setBackgroundColor:BUTTON_BACKGROUND_COLOR];
+        [_retweetButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [_retweetButton.titleLabel setFont:[UIFont systemFontOfSize:12.0f]];
+        _retweetButton.translatesAutoresizingMaskIntoConstraints = NO;
+    }
+    return _retweetButton;
+}
+
+- (UIButton *)collectButton {
+    if (!_collectButton) {
+        _collectButton = [UIButton new];
+        [_collectButton setTitle:@"收藏" forState:UIControlStateNormal];
+        [_collectButton setBackgroundColor:BUTTON_BACKGROUND_COLOR];
+        [_collectButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [_collectButton.titleLabel setFont:[UIFont systemFontOfSize:12.0f]];
+        _collectButton.translatesAutoresizingMaskIntoConstraints = NO;
+    }
+    return _collectButton;
+}
+
+- (UIButton *)laterReadButton {
+    if (!_laterReadButton) {
+        _laterReadButton = [UIButton new];
+        [_laterReadButton setTitle:@"稍后阅读" forState:UIControlStateNormal];
+        [_laterReadButton setBackgroundColor:BUTTON_BACKGROUND_COLOR];
+        [_laterReadButton setTitleColor:[UIColor blackColor] forState:UIControlStateNormal];
+        [_laterReadButton.titleLabel setFont:[UIFont systemFontOfSize:12.0f]];
+        _laterReadButton.translatesAutoresizingMaskIntoConstraints = NO;
+    }
+    return _laterReadButton;
+}
+
+- (UIView *)buttonSeperator {
+    if (!_buttonSeperator) {
+        _buttonSeperator = [UIView new];
+        [_buttonSeperator setBackgroundColor:[UIColor grayColor]];
+        _buttonSeperator.translatesAutoresizingMaskIntoConstraints = NO;
+    }
+    return _buttonSeperator;
 }
 
 @end
