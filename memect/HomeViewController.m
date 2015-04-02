@@ -15,6 +15,7 @@
 #import "ThreadCell.h"
 #import "UIViewController+MMDrawerController.h"
 #import "MMDrawerBarButtonItem.h"
+#import "WebViewController.h"
 
 #define MEMECT_URL      @"http://memect.sinaapp.com/api"
 
@@ -35,6 +36,8 @@
     [self setupView];
     [self setupData];
     [self setupDataSource:0 page:1];
+    // notification register
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(navigateTo:) name:@"OPEN_LINK_IN_THREAD" object:nil];
 }
 
 // 初始化布局
@@ -120,6 +123,18 @@
     } failure:^(NSError *error) {
         NSLog(@"request memect error:%@", error);
     }];
+}
+
+#pragma mark - notification delegate
+- (void)navigateTo:(NSNotification *)notification {
+        NSDictionary *data = (NSDictionary *)notification.userInfo;
+        NSString *tapedString = [data stringValueForKey:@"tapedString"];
+        NSRange urlRange = [tapedString rangeOfString:@"http://"];
+        if (urlRange.location != NSNotFound && urlRange.location == 0) {
+            WebViewController *webViewController = [[WebViewController alloc] init];
+            [self.navigationController pushViewController:webViewController animated:YES];
+            [webViewController loadUrl:tapedString];
+        }
 }
 
 #pragma mark - gc

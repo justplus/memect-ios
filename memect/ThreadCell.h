@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "MemectThread.h"
 
-@interface ThreadCell : UITableViewCell
+@interface ThreadCell : UITableViewCell<UITextViewDelegate>
 
 // thread
 @property(nonatomic, strong)MemectThread *thread;

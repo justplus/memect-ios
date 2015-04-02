@@ -198,6 +198,7 @@
     }
     if ([[URL scheme] isEqualToString:@"http"]) {
         // 链接
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"OPEN_LINK_IN_THREAD" object:nil userInfo:@{@"tapedString": [URL absoluteString]}];
         return NO;
     }
     return YES;
